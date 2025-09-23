@@ -1,6 +1,6 @@
 name = "Fissales Chatbot"
 client_id = "be1390d3612db28f0d704595a4ca17b6"
-application_url = "https://556586879d44.ngrok-free.app"
+application_url = "https://fissales-chatbot-shopify--fissales-chatbot.europe-west4.hosted.app"
 embedded = true
 
 [access_scopes]
@@ -8,8 +8,8 @@ scopes = "read_products,read_orders,read_customers,write_products"
 
 [auth]
 redirect_urls = [
-  "https://556586879d44.ngrok-free.app/auth/callback",
-  "https://556586879d44.ngrok-free.app/auth/install"
+  "https://fissales-chatbot-shopify--fissales-chatbot.europe-west4.hosted.app/auth/callback",
+  "https://fissales-chatbot-shopify--fissales-chatbot.europe-west4.hosted.app/auth/install"
 ]
 
 [webhooks]
