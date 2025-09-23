@@ -1,13 +1,19 @@
 {
-  "apphosting": {
-    "backend": {
-      "serviceAccount": "fissales-chatbot@appspot.gserviceaccount.com",
-      "region": "europe-west4",
-      "backendId": "fissales-chatbot-backend"
+  "apphosting": [
+    {
+      "app": "fissales-chatbot",
+      "project": "FisSalesChatbotApp",
+      "source": ".",
+      "backendId": "fissales-chatbot-shopify",
+      "rootDir": "./",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "functions"
+      ],
+      "alwaysDeployFromSource": true
     }
-  },
-  "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  }
+  ]
 }
