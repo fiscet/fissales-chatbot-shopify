@@ -1,43 +1,35 @@
 import {
   Links,
+  LiveReload,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
-  json
-} from '@remix-run/react';
-import { AppProvider } from '@shopify/shopify-app-remix/react';
-import type { LoaderFunctionArgs } from '@remix-run/node';
+} from "@remix-run/react";
+import { AppProvider } from "@shopify/polaris";
+import { PolarisProvider } from "./lib/polaris-provider";
+import polarisStyles from "@shopify/polaris/build/esm/styles.css";
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  return json({
-    apiKey: process.env.SHOPIFY_API_KEY || ''
-  });
-}
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: polarisStyles },
+];
 
 export default function App() {
-  const { apiKey } = useLoaderData<typeof loader>();
-
   return (
     <html>
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <link rel="preconnect" href="https://cdn.shopify.com/" />
-        <link
-          rel="stylesheet"
-          href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
       <body>
-        <AppProvider apiKey={apiKey}>
+        <PolarisProvider>
           <Outlet />
-          <ScrollRestoration />
-          <Scripts />
-        </AppProvider>
+        </PolarisProvider>
+        <ScrollRestoration />
+        <Scripts />
+        <LiveReload />
       </body>
     </html>
   );

@@ -1,0 +1,102 @@
+import { AppProvider as PolarisAppProvider } from "@shopify/polaris";
+import { ReactNode } from "react";
+
+interface PolarisProviderProps {
+  children: ReactNode;
+}
+
+export function PolarisProvider({ children }: PolarisProviderProps) {
+  return (
+    <PolarisAppProvider
+      i18n={{
+        Polaris: {
+          Common: {
+            checkbox: "checkbox",
+            undo: "undo",
+            cancel: "Cancel",
+            clear: "Clear",
+            submit: "Submit",
+            more: "More",
+            search: "Search",
+            save: "Save",
+            delete: "Delete",
+            edit: "Edit",
+            close: "Close",
+            loading: "Loading",
+            clearFilter: "Clear filter",
+            clearAllFilters: "Clear all filters",
+            showAll: "Show all",
+            showLess: "Show less",
+            showMore: "Show more",
+            optional: "Optional",
+            required: "Required",
+            previous: "Previous",
+            next: "Next",
+            back: "Back",
+            skip: "Skip",
+            done: "Done",
+            complete: "Complete",
+            refresh: "Refresh",
+            filter: "Filter",
+            sort: "Sort",
+            view: "View",
+            hide: "Hide",
+            show: "Show",
+            select: "Select",
+            deselect: "Deselect",
+            selectAll: "Select all",
+            deselectAll: "Deselect all",
+            selectPage: "Select page",
+            deselectPage: "Deselect page",
+            selectAllPages: "Select all pages",
+            deselectAllPages: "Deselect all pages",
+            selectAllResults: "Select all results",
+            deselectAllResults: "Deselect all results",
+            selectAllItems: "Select all items",
+            deselectAllItems: "Deselect all items",
+            selectAllProducts: "Select all products",
+            deselectAllProducts: "Deselect all products",
+            selectAllCustomers: "Select all customers",
+            deselectAllCustomers: "Deselect all customers",
+            selectAllOrders: "Select all orders",
+            deselectAllOrders: "Deselect all orders",
+            selectAllCollections: "Select all collections",
+            deselectAllCollections: "Deselect all collections",
+            selectAllBlogs: "Select all blogs",
+            deselectAllBlogs: "Deselect all blogs",
+            selectAllArticles: "Select all articles",
+            deselectAllArticles: "Deselect all articles",
+            selectAllComments: "Select all comments",
+            deselectAllComments: "Deselect all comments",
+            selectAllReviews: "Select all reviews",
+            deselectAllReviews: "Deselect all reviews",
+            selectAllDiscounts: "Select all discounts",
+            deselectAllDiscounts: "Deselect all discounts",
+            selectAllGiftCards: "Select all gift cards",
+            deselectAllGiftCards: "Deselect all gift cards",
+            selectAllApps: "Select all apps",
+            deselectAllApps: "Deselect all apps",
+            selectAllThemes: "Select all themes",
+            deselectAllThemes: "Deselect all themes",
+            selectAllFiles: "Select all files",
+            deselectAllFiles: "Deselect all files",
+            selectAllImages: "Select all images",
+            deselectAllImages: "Deselect all images",
+            selectAllVideos: "Select all videos",
+            deselectAllVideos: "Deselect all videos",
+            selectAllAudio: "Select all audio",
+            deselectAllAudio: "Deselect all audio",
+            selectAllDocuments: "Select all documents",
+            deselectAllDocuments: "Deselect all documents",
+            selectAllArchives: "Select all archives",
+            deselectAllArchives: "Deselect all archives",
+            selectAllOther: "Select all other",
+            deselectAllOther: "Deselect all other",
+          },
+        },
+      }}
+    >
+      {children}
+    </PolarisAppProvider>
+  );
+}

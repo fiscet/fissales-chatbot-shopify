@@ -1,6 +1,0 @@
-name = "Chatbot"
-type = "theme"
-
-[access_scopes]
-scopes = "read_metafields,write_metafields"
-

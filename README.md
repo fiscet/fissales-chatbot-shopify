@@ -1,111 +1,168 @@
-# FisSales Chatbot for Shopify
+# Fissales Chatbot Shopify App
 
-A powerful AI chatbot integration for Shopify stores that helps enhance customer service and engagement through automated conversations.
+An AI-powered chatbot for Shopify stores that provides customer support and product recommendations.
 
-## 🤖 What is FisSales Chatbot?
+## Features
 
-FisSales Chatbot is a Shopify app that integrates an AI-powered chatbot into your store. It helps you:
+- **Large Chat Interface**: Spacious chat area for customer interactions
+- **Admin Settings Panel**: Configure API keys and external API URLs
+- **Product Recommendations**: Display recommended products from chatbot responses
+- **Session Management**: Track user sessions and maintain conversation history
+- **Shopify Integration**: Embedded app with proper authentication and permissions
+- **Real-time Communication**: Send requests to external AI services with proper headers
 
-- Provide instant customer support 24/7
-- Answer customer questions automatically
-- Guide customers through their shopping journey
-- Reduce response time and improve customer satisfaction
+## Technical Stack
 
-## 🎯 Key Features
+- **Framework**: Remix (React-based)
+- **Platform**: Shopify Embedded App
+- **Database**: Firestore (fallback storage)
+- **UI Components**: Shopify Polaris
+- **Authentication**: Shopify OAuth
+- **API Integration**: External chatbot service
 
-- **AI-Powered Conversations**: Advanced natural language processing for human-like interactions
-- **Easy Integration**: Simple setup process with your existing AI API
-- **Customizable**: Configure API settings to match your specific AI service
-- **Shopify Native**: Seamlessly integrates with your Shopify store
-- **Secure**: Protected API key management and secure communication
+## Setup
 
-## ⚙️ Configuration
-
-The app requires two main configuration settings:
-
-1. **API URL**: The endpoint of your AI service
-2. **API Key**: Authentication key for your AI service
-
-These settings can be configured through the app's dashboard in your Shopify admin panel.
-
-## 🔥 Firebase App Hosting Deployment
-
-This app is deployed using Firebase App Hosting for scalable, serverless hosting.
-
-### Environment Variables
-
-Configure these environment variables in your Firebase backend:
-
-#### Required Variables
-- `SHOPIFY_API_KEY` - Your Shopify app's API key from the Partner Dashboard
-- `SHOPIFY_API_SECRET` - Your Shopify app's API secret key from the Partner Dashboard
-- `SHOPIFY_APP_URL` - Your app's Firebase URL (e.g., `https://fissales-chatbot--fissales-chatbot.europe-west4.hosted.app/`)
-- `SHOPIFY_SCOPES` - Comma-separated list of Shopify API scopes (e.g., `read_products,write_products`)
-- `FIREBASE_PROJECT_ID` - Your Firebase project ID
-
-#### Optional Variables
-- `NODE_ENV` - Environment mode (defaults to `production`)
-- `PORT` - Server port (defaults to `3000`)
-
-### Deploying to Firebase
-
-1. Install Firebase CLI:
+1. **Install Dependencies**
    ```bash
-   npm install -g firebase-tools
+   npm install
    ```
 
-2. Login to Firebase:
+2. **Configure Environment Variables**
+   Copy the content from `env_config.txt` to create a `.env.local` file:
    ```bash
-   firebase login
+   # Copy the content from env_config.txt to .env.local
+   # Or use the env_example as a template
    ```
 
-3. Deploy the app:
+3. **Update Configuration**
+   Edit `.env.local` with your actual values:
+   - `SHOPIFY_API_KEY`: Your Shopify app API key
+   - `SHOPIFY_API_SECRET`: Your Shopify app secret
+   - `SHOPIFY_APP_URL`: Your app's public URL
+   - `FIREBASE_PROJECT_ID`: Your Firebase project ID
+   - `FIREBASE_PRIVATE_KEY`: Your Firebase private key
+   - `FIREBASE_CLIENT_EMAIL`: Your Firebase client email
+
+   **Note**: External API configuration (URL and API key) is managed through the app settings page in Shopify admin, not through environment variables.
+
+4. **Update Shopify App Configuration**
+   Edit `shopify.app.toml` with your app details:
+   - `client_id`: Your Shopify app client ID
+   - `application_url`: Your app's public URL
+   - `dev_store_url`: Your development store URL
+
+5. **Start Development Server**
    ```bash
-   ./deploy-firebase.sh
+   npm run dev
    ```
 
-4. Or deploy manually:
+## Project Structure
+
+```
+fissales-chatbot-shopify/
+├── app/
+│   ├── routes/
+│   │   ├── _index.tsx (main landing page)
+│   │   ├── app._index.tsx (admin dashboard)
+│   │   ├── app.chat.tsx (chatbot interface)
+│   │   ├── app.settings.tsx (settings page)
+│   │   └── auth/ (authentication routes)
+│   ├── lib/
+│   │   ├── shopify.server.ts (Shopify configuration)
+│   │   └── polaris-provider.tsx (UI provider)
+│   └── root.tsx (app root)
+├── ai_docs/
+│   ├── Requirements.md
+│   └── tasks/ (detailed task breakdowns)
+├── shopify.app.toml (Shopify app configuration)
+└── package.json
+```
+
+## API Integration
+
+The chatbot sends requests to your external API (configured through the app settings page) with the following format:
+
+### Request Headers
+- `sessionId`: Unique session identifier
+- `userId`: Shopify user ID (if logged in)
+- `apiKey`: API key from admin settings
+- `Content-Type`: application/json
+
+### Request Body
+```json
+{
+  "message": "Customer message text"
+}
+```
+
+### Expected Response Format
+```json
+{
+  "response": "Bot response text",
+  "recommendedProducts": [
+    {
+      "name": "Product Name",
+      "price": "199.99",
+      "features": ["Feature 1", "Feature 2"],
+      "benefits": ["Benefit 1", "Benefit 2"],
+      "availability": "in stock",
+      "productUrl": "https://store.myshopify.com/products/product-handle"
+    }
+  ]
+}
+```
+
+## Development
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run typecheck` - Run TypeScript type checking
+- `npm run test` - Run tests
+- `npm run lint` - Run ESLint
+
+### Testing
+
+The app includes comprehensive testing setup:
+- Unit tests for components and utilities
+- Integration tests for API endpoints
+- End-to-end tests for user flows
+- Performance and security testing
+
+## Deployment
+
+1. **Build the App**
    ```bash
-   npm run build:firebase
-   firebase apphosting:backends:deploy fissales-chatbot-backend
-   firebase deploy --only firestore
+   npm run build
    ```
 
-## 🔒 Security & Privacy
+2. **Deploy to Your Hosting Platform**
+   - Update environment variables in production
+   - Ensure SSL certificates are configured
+   - Set up monitoring and logging
 
-- Secure API key storage using Firebase Firestore
-- Encrypted communication with your AI service
-- Compliant with Shopify's security standards
-- Server-side only data access with Firebase Admin SDK
+3. **Update Shopify App Settings**
+   - Update app URLs in Shopify Partner Dashboard
+   - Configure webhook endpoints
+   - Test app installation
 
-## 🚀 Getting Started
+## Security
 
-1. Install the app from the Shopify App Store
-2. Navigate to the app settings in your Shopify admin
-3. Configure your AI API settings
-4. The chatbot will be automatically integrated into your store
+- Shopify OAuth authentication
+- Secure API key storage
+- Input validation and sanitization
+- Webhook signature verification
+- Session management security
 
-## 📝 Requirements
+## Support
 
-- A Shopify store
-- An AI service API endpoint
-- Valid API key for your AI service
-- Firebase project with App Hosting and Firestore enabled
+For support and questions:
+- Check the documentation in `ai_docs/`
+- Review the task breakdowns in `ai_docs/tasks/`
+- Contact: support@fissales.com
 
-## 🔧 Technical Details
+## License
 
-- Built with Remix framework
-- Deployed on Firebase App Hosting
-- Database: Firebase Firestore
-- Uses Shopify's App Bridge for seamless integration
-- Implements Shopify's Polaris design system
-- Supports Shopify's latest API version
-- Serverless architecture with automatic scaling
-
-## 📚 Support
-
-For support or questions about the app, please contact our support team or visit our documentation.
-
-## 📄 License
-
-This app is provided by FisSales for Shopify store owners. 
+This project is proprietary software. All rights reserved.
