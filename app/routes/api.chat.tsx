@@ -1,70 +1,100 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { authenticate } from "../shopify.server";
-import { SettingsService } from "../services/settings.server";
+import { json, type ActionFunctionArgs } from "@remix-run/node";
+import { authenticate } from "../lib/shopify.server";
+import { getAppSettingsFromFirestore, saveChatSessionToFirestore, saveAnalyticsEventToFirestore } from "../lib/firestore.server";
+import { ChatApiClient } from "../lib/api.client";
 
-export const action = async ({ request }: LoaderFunctionArgs) => {
-  // Authenticate the request (optional for public endpoints, but recommended)
+export const action = async ({ request }: ActionFunctionArgs) => {
   try {
-    await authenticate.admin(request);
-  } catch (error) {
-    // For public access, you might want to skip authentication
-    // or implement a different auth mechanism
-  }
+    // Authenticate the request
+    const { admin, session } = await authenticate.admin(request);
 
-  if (request.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
+    if (request.method !== 'POST') {
+      return json({ error: 'Method not allowed' }, { status: 405 });
+    }
 
-  try {
     const body = await request.json();
-    const { chatEnvelope } = body;
-    const shopDomain = request.headers.get("X-Shop-Domain");
+    const { message, sessionId, userId } = body;
 
-    if (!shopDomain) {
-      return new Response(JSON.stringify({ error: "Shop domain required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" }
-      });
+    // Validate input
+    if (!message || !sessionId) {
+      return json({
+        error: 'Missing required fields: message and sessionId'
+      }, { status: 400 });
     }
 
-    // Get the API settings for this shop
-    const settings = await SettingsService.findByShop(shopDomain);
-
-    if (!settings) {
-      return new Response(JSON.stringify({ error: "Shop not configured" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" }
-      });
+    // Get app settings from Firestore
+    const settings = await getAppSettingsFromFirestore(session.shop);
+    if (!settings || !settings.apiKey || !settings.apiUrl) {
+      return json({
+        error: 'App settings not configured. Please configure API key and URL in settings.'
+      }, { status: 400 });
     }
 
-    // Forward the request to FisSales API
-    const response = await fetch(settings.apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-FisSales-Api-Key": settings.apiKey,
-        "X-Shop-Domain": shopDomain
-      },
-      body: JSON.stringify({ chatEnvelope })
+    if (!settings.isActive) {
+      return json({
+        error: 'Chatbot is currently disabled. Please enable it in settings.'
+      }, { status: 400 });
+    }
+
+    // Create API client
+    const apiClient = new ChatApiClient(settings.apiUrl, settings.apiKey);
+
+    // Send message to external API
+    const response = await apiClient.sendMessage(message, sessionId, userId);
+
+    // Save chat session to Firestore
+    await saveChatSessionToFirestore({
+      sessionId,
+      shopDomain: session.shop,
+      userId,
+      messages: [
+        {
+          id: Date.now().toString(),
+          content: message,
+          sender: 'user',
+          timestamp: new Date(),
+        },
+        {
+          id: (Date.now() + 1).toString(),
+          content: response.response,
+          sender: 'bot',
+          timestamp: new Date(),
+          recommendedProducts: response.recommendedProducts,
+        }
+      ],
+      isActive: true,
     });
 
-    if (!response.ok) {
-      throw new Error(`FisSales API responded with status: ${response.status}`);
-    }
+    // Save analytics event
+    await saveAnalyticsEventToFirestore({
+      shopDomain: session.shop,
+      eventType: 'message_sent',
+      eventData: {
+        messageLength: message.length,
+        hasRecommendations: response.recommendedProducts.length > 0,
+        recommendationCount: response.recommendedProducts.length,
+      },
+      sessionId,
+      userId,
+    });
 
-    const data = await response.json();
-    return new Response(JSON.stringify(data), {
-      headers: { "Content-Type": "application/json" }
+    return json({
+      success: true,
+      response: response.response,
+      recommendedProducts: response.recommendedProducts,
     });
 
   } catch (error) {
-    console.error("Proxy error:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    });
+    console.error('Chat API error:', error);
+
+    if (error instanceof Error) {
+      return json({
+        error: error.message
+      }, { status: 500 });
+    }
+
+    return json({
+      error: 'An unexpected error occurred'
+    }, { status: 500 });
   }
-}; 
+};

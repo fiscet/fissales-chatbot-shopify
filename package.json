@@ -1,73 +1,55 @@
 {
   "name": "fissales-chatbot-shopify",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "AI-powered chatbot for Shopify stores with product recommendations",
   "private": true,
-  "scripts": {
-    "build": "remix vite:build",
-    "dev": "shopify app dev",
-    "config:link": "shopify app config link",
-    "generate": "shopify app generate",
-    "deploy": "shopify app deploy",
-    "config:use": "shopify app config use",
-    "env": "shopify app env",
-    "start": "remix-serve ./build/server/index.js",
-    "build:firebase": "npm run build",
-    "deploy:firebase": "firebase apphosting:backends:deploy fissales-chatbot-backend",
-    "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
-    "shopify": "shopify",
-    "graphql-codegen": "graphql-codegen",
-    "vite": "vite"
-  },
+  "sideEffects": false,
   "type": "module",
-  "engines": {
-    "node": "^18.20 || ^20.10 || >=21.0.0"
+  "scripts": {
+    "build": "remix build",
+    "dev": "remix dev --manual",
+    "start": "remix-serve ./build/index.js",
+    "typecheck": "tsc",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:e2e": "playwright test",
+    "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
+    "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
-    "@remix-run/dev": "^2.16.1",
-    "@remix-run/fs-routes": "^2.16.1",
-    "@remix-run/node": "^2.16.1",
-    "@remix-run/react": "^2.16.1",
-    "@remix-run/serve": "^2.16.1",
-    "@shopify/app-bridge-react": "^4.1.6",
+    "@google-cloud/firestore": "^7.11.5",
+    "@remix-run/node": "^2.8.1",
+    "@remix-run/react": "^2.8.1",
+    "@remix-run/serve": "^2.8.1",
     "@shopify/polaris": "^12.0.0",
-    "@shopify/shopify-app-remix": "^4.0.1",
-    "firebase-admin": "^13.5.0",
-    "isbot": "^5.1.0",
+    "@shopify/polaris-icons": "^7.0.0",
+    "@shopify/shopify-app-remix": "^2.0.0",
+    "@shopify/shopify-app-session-storage-memory": "^2.0.0",
+    "firebase": "^10.7.1",
+    "firebase-admin": "^12.0.0",
+    "isbot": "^4.4.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "vite-tsconfig-paths": "^5.0.1"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@remix-run/eslint-config": "^2.16.1",
-    "@remix-run/route-config": "^2.16.1",
-    "@shopify/api-codegen-preset": "^1.1.1",
-    "@types/eslint": "^9.6.1",
-    "@types/node": "^22.2.0",
-    "@types/react": "^18.2.31",
-    "@types/react-dom": "^18.2.14",
-    "eslint": "^8.42.0",
-    "eslint-config-prettier": "^10.0.1",
-    "prettier": "^3.2.4",
-    "typescript": "^5.2.2",
-    "vite": "^7.1.7"
+    "@playwright/test": "^1.40.0",
+    "@remix-run/dev": "^2.8.1",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.56.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
+    "vitest": "^1.1.0"
   },
-  "workspaces": [
-    "extensions/*"
-  ],
-  "trustedDependencies": [
-    "@shopify/plugin-cloudflare"
-  ],
-  "resolutions": {
-    "@graphql-tools/url-loader": "8.0.16",
-    "@graphql-codegen/client-preset": "4.7.0",
-    "@graphql-codegen/typescript-operations": "4.5.0",
-    "minimatch": "9.0.5"
-  },
-  "overrides": {
-    "@graphql-tools/url-loader": "8.0.16",
-    "@graphql-codegen/client-preset": "4.7.0",
-    "@graphql-codegen/typescript-operations": "4.5.0",
-    "minimatch": "9.0.5"
-  },
-  "author": "fiscet"
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

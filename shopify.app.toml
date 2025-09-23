@@ -1,36 +1,41 @@
-# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
-
-client_id = "62d1c4603664a9155547e9840cacf1b4"
-name = "fissales-chatbot"
-handle = "fissales-chatbot"
-application_url = "fissales-chatbot-shopify--fissales-chatbot.europe-west4.hosted.app/"
+name = "Fissales Chatbot"
+client_id = "be1390d3612db28f0d704595a4ca17b6"
+application_url = "https://556586879d44.ngrok-free.app"
 embedded = true
 
-[build]
-automatically_update_urls_on_dev = true
-include_config_on_deploy = true
-
-[webhooks]
-api_version = "2025-04"
-
-  [[webhooks.subscriptions]]
-  topics = [ "app/scopes_update" ]
-  uri = "/webhooks/app/scopes_update"
-
-  [[webhooks.subscriptions]]
-  topics = [ "app/uninstalled" ]
-  uri = "/webhooks/app/uninstalled"
-
 [access_scopes]
-# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_products,write_products"
+scopes = "read_products,read_orders,read_customers,write_products"
 
 [auth]
 redirect_urls = [
-  "fissales-chatbot-shopify--fissales-chatbot.europe-west4.hosted.app/auth/callback",
-  "fissales-chatbot-shopify--fissales-chatbot.europe-west4.hosted.app/auth/shopify/callback",
-  "fissales-chatbot-shopify--fissales-chatbot.europe-west4.hosted.app/api/auth/callback"
+  "https://556586879d44.ngrok-free.app/auth/callback",
+  "https://556586879d44.ngrok-free.app/auth/install"
 ]
+
+[webhooks]
+api_version = "2024-01"
+
+[webhooks.subscriptions]
+# Product updates
+[[webhooks.subscriptions]]
+topics = ["products/update", "products/create", "products/delete"]
+uri = "/webhooks/products"
+
+# Order updates
+[[webhooks.subscriptions]]
+topics = ["orders/paid", "orders/fulfilled", "orders/cancelled"]
+uri = "/webhooks/orders"
+
+# Customer updates
+[[webhooks.subscriptions]]
+topics = ["customers/create", "customers/update"]
+uri = "/webhooks/customers"
 
 [pos]
 embedded = false
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "your-dev-store.myshopify.com"
+
+[build.include_config_on_deploy]
