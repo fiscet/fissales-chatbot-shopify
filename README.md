@@ -40,7 +40,7 @@ Configure these environment variables in your Firebase backend:
 - `SHOPIFY_API_KEY` - Your Shopify app's API key from the Partner Dashboard
 - `SHOPIFY_API_SECRET` - Your Shopify app's API secret key from the Partner Dashboard
 - `SHOPIFY_APP_URL` - Your app's Firebase URL (e.g., `https://fissales-chatbot--fissales-chatbot.europe-west4.hosted.app/`)
-- `SCOPES` - Comma-separated list of Shopify API scopes (e.g., `read_products,write_products`)
+- `SHOPIFY_SCOPES` - Comma-separated list of Shopify API scopes (e.g., `read_products,write_products`)
 - `FIREBASE_PROJECT_ID` - Your Firebase project ID
 
 #### Optional Variables
