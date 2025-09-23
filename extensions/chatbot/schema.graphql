@@ -1,0 +1,7 @@
+# Chatbot extension - no exposed metafields needed
+# API credentials are stored server-side only
+
+# Empty schema since we don't expose any metafields to the client
+extend type App {
+  _: Boolean
+}

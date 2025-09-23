@@ -1,0 +1,11 @@
+{
+  "chatbot": {
+    "title": "%{name} and FisSales",
+    "welcome_guest": "Hi! Ask me whatever you want :-)",
+    "welcome_user": "Hi %{name}! How can I help you today?",
+    "textbox_placeholder": "Write your question ...",
+    "errors": {
+      "default": "Sorry, something went wrong with our server :-("
+    }
+  }
+}

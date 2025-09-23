@@ -1,0 +1,13 @@
+runConfig:
+  runtime: nodejs18
+  env:
+    - variable: NODE_ENV
+      value: production
+    - variable: PORT
+      value: "3000"
+  memory: 1Gi
+  cpu: 1
+  concurrency: 1000
+  maxInstances: 100
+  minInstances: 0
+  timeoutSeconds: 300

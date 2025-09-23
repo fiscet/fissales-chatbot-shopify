@@ -1,0 +1,13 @@
+{
+  "apphosting": {
+    "backend": {
+      "serviceAccount": "fissales-chatbot@appspot.gserviceaccount.com",
+      "region": "europe-west4",
+      "backendId": "fissales-chatbot-backend"
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}
