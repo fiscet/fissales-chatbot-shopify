@@ -42,7 +42,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       apiKey
     });
   }
-  
+
   const updatedSettings = await settingsStorage.getSettings(session.shop);
 
   return new Response(JSON.stringify({ settings: updatedSettings }), {
