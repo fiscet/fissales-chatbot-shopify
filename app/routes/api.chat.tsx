@@ -1,100 +1,72 @@
-import { json, type ActionFunctionArgs } from "@remix-run/node";
-import { authenticate } from "../lib/shopify.server";
-import { getAppSettingsFromFirestore, saveChatSessionToFirestore, saveAnalyticsEventToFirestore } from "../lib/firestore.server";
-import { ChatApiClient } from "../lib/api.client";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { authenticate } from "../shopify.server";
+import prisma from "../db.server";
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request }: LoaderFunctionArgs) => {
+  // Authenticate the request (optional for public endpoints, but recommended)
   try {
-    // Authenticate the request
-    const { admin, session } = await authenticate.admin(request);
+    await authenticate.admin(request);
+  } catch (error) {
+    // For public access, you might want to skip authentication
+    // or implement a different auth mechanism
+  }
 
-    if (request.method !== 'POST') {
-      return json({ error: 'Method not allowed' }, { status: 405 });
-    }
+  if (request.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), { 
+      status: 405,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
 
+  try {
     const body = await request.json();
-    const { message, sessionId, userId } = body;
+    const { chatEnvelope } = body;
+    const shopDomain = request.headers.get("X-Shop-Domain");
 
-    // Validate input
-    if (!message || !sessionId) {
-      return json({
-        error: 'Missing required fields: message and sessionId'
-      }, { status: 400 });
+    if (!shopDomain) {
+      return new Response(JSON.stringify({ error: "Shop domain required" }), { 
+        status: 400,
+        headers: { "Content-Type": "application/json" }
+      });
     }
 
-    // Get app settings from Firestore
-    const settings = await getAppSettingsFromFirestore(session.shop);
-    if (!settings || !settings.apiKey || !settings.apiUrl) {
-      return json({
-        error: 'App settings not configured. Please configure API key and URL in settings.'
-      }, { status: 400 });
-    }
-
-    if (!settings.isActive) {
-      return json({
-        error: 'Chatbot is currently disabled. Please enable it in settings.'
-      }, { status: 400 });
-    }
-
-    // Create API client
-    const apiClient = new ChatApiClient(settings.apiUrl, settings.apiKey);
-
-    // Send message to external API
-    const response = await apiClient.sendMessage(message, sessionId, userId);
-
-    // Save chat session to Firestore
-    await saveChatSessionToFirestore({
-      sessionId,
-      shopDomain: session.shop,
-      userId,
-      messages: [
-        {
-          id: Date.now().toString(),
-          content: message,
-          sender: 'user',
-          timestamp: new Date(),
-        },
-        {
-          id: (Date.now() + 1).toString(),
-          content: response.response,
-          sender: 'bot',
-          timestamp: new Date(),
-          recommendedProducts: response.recommendedProducts,
-        }
-      ],
-      isActive: true,
+    // Get the API settings for this shop
+    const settings = await prisma.settings.findUnique({
+      where: { shop: shopDomain }
     });
 
-    // Save analytics event
-    await saveAnalyticsEventToFirestore({
-      shopDomain: session.shop,
-      eventType: 'message_sent',
-      eventData: {
-        messageLength: message.length,
-        hasRecommendations: response.recommendedProducts.length > 0,
-        recommendationCount: response.recommendedProducts.length,
+    if (!settings) {
+      return new Response(JSON.stringify({ error: "Shop not configured" }), { 
+        status: 404,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    // Forward the request to Villma API
+    const response = await fetch(settings.apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Villma-Api-Key": settings.apiKey,
+        "X-Shop-Domain": shopDomain
       },
-      sessionId,
-      userId,
+      body: JSON.stringify({ chatEnvelope })
     });
 
-    return json({
-      success: true,
-      response: response.response,
-      recommendedProducts: response.recommendedProducts,
+    if (!response.ok) {
+      throw new Error(`Villma API responded with status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return new Response(JSON.stringify(data), {
+      headers: { "Content-Type": "application/json" }
     });
 
   } catch (error) {
-    console.error('Chat API error:', error);
-
-    if (error instanceof Error) {
-      return json({
-        error: error.message
-      }, { status: 500 });
-    }
-
-    return json({
-      error: 'An unexpected error occurred'
-    }, { status: 500 });
+    console.error("Proxy error:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), { 
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
   }
-};
+}; 

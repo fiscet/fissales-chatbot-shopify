@@ -1,168 +1,118 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-import { Page, Layout, Card, Text, Button, InlineStack, BlockStack, Banner } from "@shopify/polaris";
-import { authenticate } from "../lib/shopify.server";
-import { getAppSettings } from "../lib/settings.server";
-import { getShopStatisticsFromFirestore } from "../lib/firestore.server";
-import { TestProductRecommendations } from "../components/TestProductRecommendations";
+import { useState } from 'react';
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { useLoaderData, useSubmit } from '@remix-run/react';
+import {
+  Page,
+  Layout,
+  Text,
+  Card,
+  Button,
+  BlockStack,
+  Form,
+  FormLayout,
+  TextField
+} from '@shopify/polaris';
+import { authenticate } from '../shopify.server';
+import prisma from 'app/db.server';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { admin, session } = await authenticate.admin(request);
+  const { session } = await authenticate.admin(request);
 
-  try {
-    const settings = await getAppSettings(session);
-    const stats = await getShopStatisticsFromFirestore(session.shop);
+  const settings = await prisma.settings.findUnique({
+    where: { shop: session.shop }
+  });
 
-    return json({
-      shop: session.shop,
-      settings,
-      stats
-    });
-  } catch (error) {
-    console.error('Failed to load dashboard data:', error);
-    return json({
-      shop: session.shop,
-      settings: null,
-      stats: null,
-      error: 'Failed to load dashboard data'
-    });
-  }
+  return { settings };
 };
 
-export default function AppIndex() {
-  const data = useLoaderData<typeof loader>();
-  const { shop, settings, stats } = data;
-  const error = 'error' in data ? data.error : null;
+export const action = async ({ request }: ActionFunctionArgs) => {
+  const { session } = await authenticate.admin(request);
+  const formData = await request.formData();
+  const apiUrl = formData.get('apiUrl') as string;
+  const apiKey = formData.get('apiKey') as string;
 
-  if (error) {
-    return (
-      <Page title="Dashboard Error">
-        <Layout>
-          <Layout.Section>
-            <Banner tone="critical">
-              <Text variant="bodyMd" as="p">
-                {error}
-              </Text>
-            </Banner>
-          </Layout.Section>
-        </Layout>
-      </Page>
-    );
-  }
+  // Save to database only (no longer exposed to client)
+  const settings = await prisma.settings.upsert({
+    where: { shop: session.shop },
+    update: { apiUrl, apiKey },
+    create: {
+      shop: session.shop,
+      apiUrl,
+      apiKey
+    }
+  });
+
+  return new Response(JSON.stringify({ settings }), {
+    headers: { "Content-Type": "application/json" }
+  });
+};
+
+export default function Index() {
+  const { settings } = useLoaderData<typeof loader>();
+  const submit = useSubmit();
+  const [formState, setFormState] = useState({
+    apiUrl: settings?.apiUrl || '',
+    apiKey: settings?.apiKey || ''
+  });
+
+  const handleSubmit = () => {
+    const formData = new FormData();
+    formData.append('apiUrl', formState.apiUrl);
+    formData.append('apiKey', formState.apiKey);
+    submit(formData, { method: 'post' });
+  };
 
   return (
     <Page
-      title="Fissales Chatbot"
-      subtitle={`Welcome to your chatbot dashboard for ${shop}`}
+      title="AI Chatbot Settings"
+      primaryAction={
+        <Button variant="primary" onClick={handleSubmit}>
+          Save
+        </Button>
+      }
     >
-      <Layout>
-        <Layout.Section>
-          <Card>
-            <div style={{ padding: "2rem" }}>
-              <BlockStack gap="400">
-                <Text variant="headingMd" as="h2">
-                  Chatbot Dashboard
-                </Text>
-                <Text variant="bodyLg" as="p">
-                  Manage your AI-powered chatbot settings and monitor customer interactions.
-                </Text>
-
-                {settings && (
-                  <BlockStack gap="200">
-                    <Text variant="bodyMd" as="p">
-                      <strong>Status:</strong> {settings.isActive ? 'Active' : 'Disabled'}
-                    </Text>
-                    <Text variant="bodyMd" as="p">
-                      <strong>API Configuration:</strong> {settings.apiKey && settings.apiUrl ? 'Configured' : 'Not configured'}
-                    </Text>
-                  </BlockStack>
-                )}
-
-                <InlineStack gap="400" align="space-between">
-                  <Button
-                    variant="primary"
-                    url="/app/chat"
-                    size="large"
-                    disabled={!settings?.isActive}
-                  >
-                    Open Chatbot
-                  </Button>
-                  <Button
-                    url="/app/settings"
-                    size="large"
-                  >
-                    Settings
-                  </Button>
-                </InlineStack>
-
-                <InlineStack gap="400" align="space-between">
-                  <Button
-                    url="/app/integration"
-                    size="large"
-                  >
-                    Theme Integration
-                  </Button>
-                  <div></div>
-                </InlineStack>
-              </BlockStack>
-            </div>
-          </Card>
-        </Layout.Section>
-
-        <Layout.Section>
-          <Card>
-            <div style={{ padding: "2rem" }}>
-              <BlockStack gap="400">
-                <Text variant="headingMd" as="h2">
-                  Quick Stats
-                </Text>
-                <InlineStack gap="400" align="space-between">
-                  <div style={{ textAlign: "center" }}>
-                    <Text variant="headingLg" as="p">
-                      {stats?.totalMessages || 0}
-                    </Text>
-                    <Text variant="bodyMd" as="p">Total Messages</Text>
-                  </div>
-                  <div style={{ textAlign: "center" }}>
-                    <Text variant="headingLg" as="p">
-                      {stats?.activeSessions || 0}
-                    </Text>
-                    <Text variant="bodyMd" as="p">Active Sessions</Text>
-                  </div>
-                  <div style={{ textAlign: "center" }}>
-                    <Text variant="headingLg" as="p">
-                      {stats?.totalSessions || 0}
-                    </Text>
-                    <Text variant="bodyMd" as="p">Total Sessions</Text>
-                  </div>
-                </InlineStack>
-
-                {stats?.lastActivity && (
-                  <div style={{ textAlign: "center", marginTop: "1rem" }}>
-                    <Text variant="bodySm" tone="subdued" as="p">
-                      Last activity: {new Date(stats.lastActivity).toLocaleString()}
-                    </Text>
-                  </div>
-                )}
-              </BlockStack>
-            </div>
-          </Card>
-        </Layout.Section>
-
-        <Layout.Section>
-          <TestProductRecommendations />
-        </Layout.Section>
-
-        {(!settings?.apiKey || !settings?.apiUrl) && (
+      <BlockStack gap="500">
+        <Layout>
           <Layout.Section>
-            <Banner tone="warning">
-              <Text variant="bodyMd" as="p">
-                Your chatbot is not configured yet. Please set up your external API in the settings page to start using the chatbot.
-              </Text>
-            </Banner>
+            <Card>
+              <BlockStack gap="500">
+                <BlockStack gap="200">
+                  <Text as="h2" variant="headingMd">
+                    AI API Configuration
+                  </Text>
+                  <Text as="p" variant="bodyMd">
+                    Configure your AI API settings to enable the chatbot
+                    functionality. Your API credentials are stored securely on our servers and are never exposed to the client.
+                  </Text>
+                </BlockStack>
+                <Form onSubmit={handleSubmit}>
+                  <FormLayout>
+                    <TextField
+                      label="API URL"
+                      value={formState.apiUrl}
+                      onChange={(value) =>
+                        setFormState((prev) => ({ ...prev, apiUrl: value }))
+                      }
+                      autoComplete="off"
+                      helpText="The URL of your AI API server (stored securely server-side)"
+                    />
+                    <TextField
+                      label="API Key"
+                      value={formState.apiKey}
+                      onChange={(value) =>
+                        setFormState((prev) => ({ ...prev, apiKey: value }))
+                      }
+                      type="password"
+                      autoComplete="off"
+                      helpText="Your AI API authentication key (stored securely server-side)"
+                    />
+                  </FormLayout>
+                </Form>
+              </BlockStack>
+            </Card>
           </Layout.Section>
-        )}
-      </Layout>
+        </Layout>
+      </BlockStack>
     </Page>
   );
 }

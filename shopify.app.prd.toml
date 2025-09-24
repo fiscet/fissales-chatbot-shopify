@@ -1,0 +1,36 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "62d1c4603664a9155547e9840cacf1b4"
+name = "villma-chatbot"
+handle = "villma-chatbot"
+application_url = "https://shopify.app.villma.ai/"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+include_config_on_deploy = true
+
+[webhooks]
+api_version = "2025-04"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/scopes_update" ]
+  uri = "/webhooks/app/scopes_update"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_products,write_products"
+
+[auth]
+redirect_urls = [
+  "https://shopify.app.villma.ai/auth/callback",
+  "https://shopify.app.villma.ai/auth/shopify/callback",
+  "https://shopify.app.villma.ai/api/auth/callback"
+]
+
+[pos]
+embedded = false

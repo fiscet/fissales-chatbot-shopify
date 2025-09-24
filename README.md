@@ -1,168 +1,108 @@
-# Fissales Chatbot Shopify App
+# Villma Chatbot for Shopify
 
-An AI-powered chatbot for Shopify stores that provides customer support and product recommendations.
+A powerful AI chatbot integration for Shopify stores that helps enhance customer service and engagement through automated conversations.
 
-## Features
+## 🤖 What is Villma Chatbot?
 
-- **Large Chat Interface**: Spacious chat area for customer interactions
-- **Admin Settings Panel**: Configure API keys and external API URLs
-- **Product Recommendations**: Display recommended products from chatbot responses
-- **Session Management**: Track user sessions and maintain conversation history
-- **Shopify Integration**: Embedded app with proper authentication and permissions
-- **Real-time Communication**: Send requests to external AI services with proper headers
+Villma Chatbot is a Shopify app that integrates an AI-powered chatbot into your store. It helps you:
 
-## Technical Stack
+- Provide instant customer support 24/7
+- Answer customer questions automatically
+- Guide customers through their shopping journey
+- Reduce response time and improve customer satisfaction
 
-- **Framework**: Remix (React-based)
-- **Platform**: Shopify Embedded App
-- **Database**: Firestore (fallback storage)
-- **UI Components**: Shopify Polaris
-- **Authentication**: Shopify OAuth
-- **API Integration**: External chatbot service
+## 🎯 Key Features
 
-## Setup
+- **AI-Powered Conversations**: Advanced natural language processing for human-like interactions
+- **Easy Integration**: Simple setup process with your existing AI API
+- **Customizable**: Configure API settings to match your specific AI service
+- **Shopify Native**: Seamlessly integrates with your Shopify store
+- **Secure**: Protected API key management and secure communication
 
-1. **Install Dependencies**
+## ⚙️ Configuration
+
+The app requires two main configuration settings:
+
+1. **API URL**: The endpoint of your AI service
+2. **API Key**: Authentication key for your AI service
+
+These settings can be configured through the app's dashboard in your Shopify admin panel.
+
+## 🐳 Docker Deployment
+
+### Environment Variables
+
+The following environment variables are required for Docker deployment:
+
+#### Required Variables
+- `SHOPIFY_API_KEY` - Your Shopify app's API key from the Partner Dashboard
+- `SHOPIFY_API_SECRET` - Your Shopify app's API secret key from the Partner Dashboard
+- `SHOPIFY_APP_URL` - Your app's public URL (e.g., `https://your-app-domain.com`)
+- `SCOPES` - Comma-separated list of Shopify API scopes (e.g., `read_metafields,write_metafields`)
+
+#### Optional Variables
+- `NODE_ENV` - Environment mode (defaults to `production`)
+- `PORT` - Server port (defaults to `3000`)
+- `SHOP_CUSTOM_DOMAIN` - Custom shop domain if needed
+
+### Running with Docker
+
+1. Build the Docker image:
    ```bash
-   npm install
+   docker build -t villma-chatbot .
    ```
 
-2. **Configure Environment Variables**
-   Copy the content from `env_config.txt` to create a `.env.local` file:
+2. Run the container with environment variables:
    ```bash
-   # Copy the content from env_config.txt to .env.local
-   # Or use the env_example as a template
+   docker run -d \
+     -p 3000:3000 \
+     -e SHOPIFY_API_KEY=your_api_key \
+     -e SHOPIFY_API_SECRET=your_api_secret \
+     -e SHOPIFY_APP_URL=https://your-app-domain.com \
+     -e SCOPES=read_metafields,write_metafields \
+     villma-chatbot
    ```
 
-3. **Update Configuration**
-   Edit `.env.local` with your actual values:
-   - `SHOPIFY_API_KEY`: Your Shopify app API key
-   - `SHOPIFY_API_SECRET`: Your Shopify app secret
-   - `SHOPIFY_APP_URL`: Your app's public URL
-   - `FIREBASE_PROJECT_ID`: Your Firebase project ID
-   - `FIREBASE_PRIVATE_KEY`: Your Firebase private key
-   - `FIREBASE_CLIENT_EMAIL`: Your Firebase client email
-
-   **Note**: External API configuration (URL and API key) is managed through the app settings page in Shopify admin, not through environment variables.
-
-4. **Update Shopify App Configuration**
-   Edit `shopify.app.toml` with your app details:
-   - `client_id`: Your Shopify app client ID
-   - `application_url`: Your app's public URL
-   - `dev_store_url`: Your development store URL
-
-5. **Start Development Server**
+3. Or use a `.env` file:
    ```bash
-   npm run dev
+   docker run -d \
+     -p 3000:3000 \
+     --env-file .env \
+     villma-chatbot
    ```
 
-## Project Structure
+The container will automatically check for required environment variables on startup and provide helpful error messages if any are missing.
 
-```
-fissales-chatbot-shopify/
-├── app/
-│   ├── routes/
-│   │   ├── _index.tsx (main landing page)
-│   │   ├── app._index.tsx (admin dashboard)
-│   │   ├── app.chat.tsx (chatbot interface)
-│   │   ├── app.settings.tsx (settings page)
-│   │   └── auth/ (authentication routes)
-│   ├── lib/
-│   │   ├── shopify.server.ts (Shopify configuration)
-│   │   └── polaris-provider.tsx (UI provider)
-│   └── root.tsx (app root)
-├── ai_docs/
-│   ├── Requirements.md
-│   └── tasks/ (detailed task breakdowns)
-├── shopify.app.toml (Shopify app configuration)
-└── package.json
-```
+## 🔒 Security & Privacy
 
-## API Integration
+- Secure API key storage using Shopify's metafields
+- Encrypted communication with your AI service
+- Compliant with Shopify's security standards
 
-The chatbot sends requests to your external API (configured through the app settings page) with the following format:
+## 🚀 Getting Started
 
-### Request Headers
-- `sessionId`: Unique session identifier
-- `userId`: Shopify user ID (if logged in)
-- `apiKey`: API key from admin settings
-- `Content-Type`: application/json
+1. Install the app from the Shopify App Store
+2. Navigate to the app settings in your Shopify admin
+3. Configure your AI API settings
+4. The chatbot will be automatically integrated into your store
 
-### Request Body
-```json
-{
-  "message": "Customer message text"
-}
-```
+## 📝 Requirements
 
-### Expected Response Format
-```json
-{
-  "response": "Bot response text",
-  "recommendedProducts": [
-    {
-      "name": "Product Name",
-      "price": "199.99",
-      "features": ["Feature 1", "Feature 2"],
-      "benefits": ["Benefit 1", "Benefit 2"],
-      "availability": "in stock",
-      "productUrl": "https://store.myshopify.com/products/product-handle"
-    }
-  ]
-}
-```
+- A Shopify store
+- An AI service API endpoint
+- Valid API key for your AI service
 
-## Development
+## 🔧 Technical Details
 
-### Available Scripts
+- Built with Remix framework
+- Uses Shopify's App Bridge for seamless integration
+- Implements Shopify's Polaris design system
+- Supports Shopify's latest API version
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run typecheck` - Run TypeScript type checking
-- `npm run test` - Run tests
-- `npm run lint` - Run ESLint
+## 📚 Support
 
-### Testing
+For support or questions about the app, please contact our support team or visit our documentation.
 
-The app includes comprehensive testing setup:
-- Unit tests for components and utilities
-- Integration tests for API endpoints
-- End-to-end tests for user flows
-- Performance and security testing
+## 📄 License
 
-## Deployment
-
-1. **Build the App**
-   ```bash
-   npm run build
-   ```
-
-2. **Deploy to Your Hosting Platform**
-   - Update environment variables in production
-   - Ensure SSL certificates are configured
-   - Set up monitoring and logging
-
-3. **Update Shopify App Settings**
-   - Update app URLs in Shopify Partner Dashboard
-   - Configure webhook endpoints
-   - Test app installation
-
-## Security
-
-- Shopify OAuth authentication
-- Secure API key storage
-- Input validation and sanitization
-- Webhook signature verification
-- Session management security
-
-## Support
-
-For support and questions:
-- Check the documentation in `ai_docs/`
-- Review the task breakdowns in `ai_docs/tasks/`
-- Contact: support@fissales.com
-
-## License
-
-This project is proprietary software. All rights reserved.
+This app is provided by Villma for Shopify store owners. 
