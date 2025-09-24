@@ -14,7 +14,9 @@
     "test:watch": "vitest --watch",
     "test:e2e": "playwright test",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "lint:fix": "npm run lint -- --fix"
+    "lint:fix": "npm run lint -- --fix",
+    "deploy": "shopify app deploy --force",
+    "dev:shopify": "shopify app dev"
   },
   "dependencies": {
     "@google-cloud/firestore": "^7.11.5",
