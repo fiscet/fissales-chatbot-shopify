@@ -1,0 +1,36 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "7c9a6b6bc1f65d33c20ef0d2ea924227"
+name = "fissales-chatbot-dev"
+handle = "fissales-chatbot-dev"
+application_url = "https://dev.shopify.app.fissales.ai/"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+include_config_on_deploy = true
+
+[webhooks]
+api_version = "2025-07"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/scopes_update" ]
+  uri = "/webhooks/app/scopes_update"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_products,write_products"
+
+[auth]
+redirect_urls = [
+  "https://dev.shopify.app.fissales.ai/auth/callback",
+  "https://dev.shopify.app.fissales.ai/auth/shopify/callback",
+  "https://dev.shopify.app.fissales.ai/api/auth/callback"
+]
+
+[pos]
+embedded = false
