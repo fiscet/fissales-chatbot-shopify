@@ -30,14 +30,16 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function AppIndex() {
-  const { shop, settings, stats, error } = useLoaderData<typeof loader>();
+  const data = useLoaderData<typeof loader>();
+  const { shop, settings, stats } = data;
+  const error = 'error' in data ? data.error : null;
 
   if (error) {
     return (
       <Page title="Dashboard Error">
         <Layout>
           <Layout.Section>
-            <Banner status="critical">
+            <Banner tone="critical">
               <Text variant="bodyMd" as="p">
                 {error}
               </Text>
@@ -57,7 +59,7 @@ export default function AppIndex() {
         <Layout.Section>
           <Card>
             <div style={{ padding: "2rem" }}>
-              <BlockStack vertical spacing="loose">
+              <BlockStack gap="400">
                 <Text variant="headingMd" as="h2">
                   Chatbot Dashboard
                 </Text>
@@ -66,7 +68,7 @@ export default function AppIndex() {
                 </Text>
 
                 {settings && (
-                  <BlockStack vertical spacing="tight">
+                  <BlockStack gap="200">
                     <Text variant="bodyMd" as="p">
                       <strong>Status:</strong> {settings.isActive ? 'Active' : 'Disabled'}
                     </Text>
@@ -78,7 +80,7 @@ export default function AppIndex() {
 
                 <InlineStack gap="400" align="space-between">
                   <Button
-                    primary
+                    variant="primary"
                     url="/app/chat"
                     size="large"
                     disabled={!settings?.isActive}
@@ -92,6 +94,16 @@ export default function AppIndex() {
                     Settings
                   </Button>
                 </InlineStack>
+
+                <InlineStack gap="400" align="space-between">
+                  <Button
+                    url="/app/integration"
+                    size="large"
+                  >
+                    Theme Integration
+                  </Button>
+                  <div></div>
+                </InlineStack>
               </BlockStack>
             </div>
           </Card>
@@ -100,7 +112,7 @@ export default function AppIndex() {
         <Layout.Section>
           <Card>
             <div style={{ padding: "2rem" }}>
-              <BlockStack vertical spacing="loose">
+              <BlockStack gap="400">
                 <Text variant="headingMd" as="h2">
                   Quick Stats
                 </Text>
@@ -127,7 +139,7 @@ export default function AppIndex() {
 
                 {stats?.lastActivity && (
                   <div style={{ textAlign: "center", marginTop: "1rem" }}>
-                    <Text variant="bodySm" color="subdued">
+                    <Text variant="bodySm" tone="subdued" as="p">
                       Last activity: {new Date(stats.lastActivity).toLocaleString()}
                     </Text>
                   </div>
@@ -143,7 +155,7 @@ export default function AppIndex() {
 
         {(!settings?.apiKey || !settings?.apiUrl) && (
           <Layout.Section>
-            <Banner status="warning">
+            <Banner tone="warning">
               <Text variant="bodyMd" as="p">
                 Your chatbot is not configured yet. Please set up your external API in the settings page to start using the chatbot.
               </Text>

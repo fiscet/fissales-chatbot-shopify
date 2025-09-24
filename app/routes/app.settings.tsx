@@ -1,6 +1,6 @@
 import { json, type LoaderFunctionArgs, type ActionFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useActionData, useNavigation } from "@remix-run/react";
-import { Page, Layout, Card, Text, InlineBlockStack, BlockBlockStack, Banner } from "@shopify/polaris";
+import { Page, Layout, Card, Text, Banner, BlockStack } from "@shopify/polaris";
 import { authenticate } from "../lib/shopify.server";
 import { getAppSettings, saveAppSettings, testApiConnection, validateApiSettings } from "../lib/settings.server";
 import { SettingsForm } from "../components/SettingsForm";
@@ -81,7 +81,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function SettingsPage() {
-  const { shop, settings, error } = useLoaderData<typeof loader>();
+  const data = useLoaderData<typeof loader>();
+  const { shop, settings } = data;
+  const error = 'error' in data ? data.error : null;
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
 
@@ -92,7 +94,7 @@ export default function SettingsPage() {
       <Page title="Settings Error">
         <Layout>
           <Layout.Section>
-            <Banner status="critical">
+            <Banner tone="critical">
               <Text variant="bodyMd" as="p">
                 {error}
               </Text>
@@ -129,7 +131,11 @@ export default function SettingsPage() {
       <Layout>
         <Layout.Section>
           <SettingsForm
-            settings={settings}
+            settings={{
+              ...settings,
+              createdAt: new Date(settings.createdAt),
+              updatedAt: new Date(settings.updatedAt)
+            }}
             onSave={async () => { }} // Handled by the form itself
             isLoading={isSubmitting}
           />
@@ -138,14 +144,14 @@ export default function SettingsPage() {
         <Layout.Section>
           <Card>
             <div style={{ padding: "2rem" }}>
-              <BlockStack vertical spacing="loose">
+              <BlockStack gap="400">
                 <Text variant="headingMd" as="h2">
                   Configuration Help
                 </Text>
                 <Text variant="bodyLg" as="p">
                   To use this chatbot, you need to configure the external API that will handle the chat requests.
                 </Text>
-                <BlockStack vertical spacing="tight">
+                <BlockStack gap="200">
                   <Text variant="bodyMd" as="p">
                     <strong>API Key:</strong> Your authentication key for the external chatbot service
                   </Text>

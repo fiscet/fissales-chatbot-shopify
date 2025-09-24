@@ -4,13 +4,12 @@ import {
   FormLayout,
   TextField,
   Button,
-  InlineBlockStack,
-  BlockBlockStack,
   Banner,
   Checkbox,
   Select,
   Text,
   Divider,
+  BlockStack,
 } from "@shopify/polaris";
 import type { AppSettings, SettingsData } from "../lib/settings.server";
 
@@ -23,8 +22,6 @@ interface SettingsFormProps {
 
 export function SettingsForm({
   settings,
-  onSave,
-  onTestConnection,
   isLoading = false
 }: SettingsFormProps) {
   const [formData, setFormData] = useState<SettingsData>({
@@ -158,7 +155,7 @@ export function SettingsForm({
   return (
     <Card>
       <div style={{ padding: '2rem' }}>
-        <BlockStack vertical spacing="loose">
+        <BlockStack spacing="loose">
           <Text variant="headingMd" as="h2">
             API Configuration
           </Text>

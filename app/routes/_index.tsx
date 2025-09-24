@@ -5,8 +5,12 @@ import { authenticate } from "../lib/shopify.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
-    await authenticate.admin(request);
-    return json({ message: "Welcome to Fissales Chatbot!", authenticated: true });
+    const { admin, session } = await authenticate.admin(request);
+    return json({
+      message: "Welcome to Fissales Chatbot!",
+      authenticated: true,
+      shop: session.shop
+    });
   } catch (error) {
     // Se non autenticato, mostra pagina di benvenuto senza autenticazione
     return json({ message: "Welcome to Fissales Chatbot!", authenticated: false });
@@ -27,27 +31,27 @@ export default function Index() {
               </Text>
               <div style={{ marginTop: "2rem" }}>
                 <Text variant="bodyLg" as="p">
-                  Your AI-powered chatbot is ready to help your customers find the perfect products.
+                  Configure your AI-powered chatbot to help your customers find the perfect products.
                 </Text>
               </div>
               {authenticated ? (
                 <div style={{ marginTop: "2rem" }}>
                   <Button
-                    primary
-                    url="/app"
+                    variant="primary"
+                    url="/app/settings"
                     size="large"
                   >
-                    Open Chatbot
+                    Configure Settings
                   </Button>
                 </div>
               ) : (
                 <div style={{ marginTop: "2rem" }}>
-                  <Text variant="bodyMd" as="p" color="subdued">
+                  <Text variant="bodyMd" as="p" tone="subdued">
                     This app needs to be installed in a Shopify store to function properly.
                   </Text>
                   <div style={{ marginTop: "1rem" }}>
                     <Button
-                      primary
+                      variant="primary"
                       url="/install"
                       size="large"
                     >
