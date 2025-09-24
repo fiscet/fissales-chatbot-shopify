@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
-import prisma from "../db.server";
+import { settingsStorage } from "../db.server";
 
 export const action = async ({ request }: LoaderFunctionArgs) => {
   // Authenticate the request (optional for public endpoints, but recommended)
@@ -12,7 +12,7 @@ export const action = async ({ request }: LoaderFunctionArgs) => {
   }
 
   if (request.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), { 
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
       headers: { "Content-Type": "application/json" }
     });
@@ -24,19 +24,17 @@ export const action = async ({ request }: LoaderFunctionArgs) => {
     const shopDomain = request.headers.get("X-Shop-Domain");
 
     if (!shopDomain) {
-      return new Response(JSON.stringify({ error: "Shop domain required" }), { 
+      return new Response(JSON.stringify({ error: "Shop domain required" }), {
         status: 400,
         headers: { "Content-Type": "application/json" }
       });
     }
 
     // Get the API settings for this shop
-    const settings = await prisma.settings.findUnique({
-      where: { shop: shopDomain }
-    });
+    const settings = await settingsStorage.getSettings(shopDomain);
 
     if (!settings) {
-      return new Response(JSON.stringify({ error: "Shop not configured" }), { 
+      return new Response(JSON.stringify({ error: "Shop not configured" }), {
         status: 404,
         headers: { "Content-Type": "application/json" }
       });
@@ -64,7 +62,7 @@ export const action = async ({ request }: LoaderFunctionArgs) => {
 
   } catch (error) {
     console.error("Proxy error:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), { 
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" }
     });
