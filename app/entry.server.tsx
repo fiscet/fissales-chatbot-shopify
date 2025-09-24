@@ -17,6 +17,12 @@ export default async function handleRequest(
   remixContext: EntryContext
 ) {
   addDocumentResponseHeaders(request, responseHeaders);
+
+  // Add cache-busting headers to prevent old app cache issues
+  responseHeaders.set("Cache-Control", "no-cache, no-store, must-revalidate");
+  responseHeaders.set("Pragma", "no-cache");
+  responseHeaders.set("Expires", "0");
+
   const userAgent = request.headers.get("user-agent");
   const callbackName = isbot(userAgent ?? '')
     ? "onAllReady"

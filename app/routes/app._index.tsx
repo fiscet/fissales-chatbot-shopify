@@ -13,14 +13,12 @@ import {
   TextField
 } from '@shopify/polaris';
 import { authenticate } from '../shopify.server';
-import prisma from 'app/db.server';
+import { settingsStorage } from '../db.server';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
 
-  const settings = await prisma.settings.findUnique({
-    where: { shop: session.shop }
-  });
+  const settings = await settingsStorage.getSettings(session.shop);
 
   return { settings };
 };
@@ -31,18 +29,23 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const apiUrl = formData.get('apiUrl') as string;
   const apiKey = formData.get('apiKey') as string;
 
-  // Save to database only (no longer exposed to client)
-  const settings = await prisma.settings.upsert({
-    where: { shop: session.shop },
-    update: { apiUrl, apiKey },
-    create: {
+  // Get existing settings first
+  const existingSettings = await settingsStorage.getSettings(session.shop);
+
+  // Save to Firestore
+  if (existingSettings) {
+    await settingsStorage.updateSettings(session.shop, { apiUrl, apiKey });
+  } else {
+    await settingsStorage.createSettings({
       shop: session.shop,
       apiUrl,
       apiKey
-    }
-  });
+    });
+  }
+  
+  const updatedSettings = await settingsStorage.getSettings(session.shop);
 
-  return new Response(JSON.stringify({ settings }), {
+  return new Response(JSON.stringify({ settings: updatedSettings }), {
     headers: { "Content-Type": "application/json" }
   });
 };
